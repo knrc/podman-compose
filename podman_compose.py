@@ -938,8 +938,9 @@ def container_to_args(compose, cnt, detached=True):
     if pod:
         podman_args.append(f"--pod={pod}")
     deps = []
-    for dep_srv in cnt.get("_deps", None) or []:
-        deps.extend(compose.container_names_by_service.get(dep_srv, None) or [])
+    for dep_srv, condition in cnt["_deps"].items():
+        if condition != DependsCondition.COMPLETED:
+            deps.extend(compose.container_names_by_service.get(dep_srv, None) or [])
     if deps:
         deps_csv = ",".join(deps)
         podman_args.append(f"--requires={deps_csv}")
